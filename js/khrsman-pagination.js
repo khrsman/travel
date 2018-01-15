@@ -154,10 +154,10 @@
 
         // fungsi untuk kolom detail
         function detailColumn(val,i,content){
-          href = settings.plus_column[i+1].href;
+          clas = settings.plus_column[i+1].class;
           id = settings.plus_column[i+1].id;
           text = settings.plus_column[i+1].text;
-          var detail = ' <a href ="'+href+id+'='+ val +'" class="btn_detail " id="btn_detail" > '+text+' </a> ';
+          var detail = '<btn value="'+val+'" class="btn_detail '+clas+' " > '+text+' </btn> ';
           if(i==0){
             content =  '<td class="pagination_detail">'+content+detail;
           }else if(i==max_plus){

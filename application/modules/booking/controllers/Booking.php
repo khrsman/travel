@@ -18,9 +18,46 @@ class Booking extends CI_Controller {
     function data(){
     $this->load->view('v_booking_data');
     }
-    function input_harga(){
-      $this->load->view('v_input_harga');
+    // function input_harga(){
+    //   $this->load->view('v_input_harga');
+    //   }
+
+
+    #menampilkan halaman input harga (tahap kedua setelah detail)
+    function input_harga_unit(){
+      $id = $this->input->get('id');
+
+      //to do harusnya pake kode booking
+      if(!isset($id)){
+           $id = $this->db->select('max(id_booking) id')->get('booking')->result_array()[0]['id'];
       }
+
+    $this->db->select('id,(select nama from unit where id_unit = det.id_unit) unit, id_vendor, (select nama from vendor where id_vendor = det.id_vendor) vendor,
+    id_unit,id_booking, (select tujuan from booking where id_booking = det.id_booking) tujuan, tanggal, harga');
+    $data =$this->db->where('id_booking', $id )->get('detail_booking det')->result_array();
+
+      $this->load->view('v_input_harga_unit',array('data' => $data));
+    }
+
+
+
+    function get_kode_booking(){
+      $tanggal = $this->input->get('tanggal');
+      $id_sumber = $this->input->get('id_sumber');
+
+      if($id_sumber !== ""){
+        $kode_web = $this->db->query("select kode from sumber where id_sumber = $id_sumber")->result_array()[0]['kode'];
+      } else{
+        $kode_web = ' - ';
+      }
+
+      $date = DateTime::createFromFormat("d/m/Y", $tanggal);
+      $format_bulan =  $date->format("my");
+       $max =  $this->db->query("select ifnull(max(no_increment_per_bulan),0)+1 no from booking
+        where DATE_FORMAT(tanggal_input,'%m%y') = $format_bulan")->result_array()[0]['no'];
+        $kode = "$kode_web $format_bulan/$max";
+        echo $kode;
+    }
 
     function editor(){
     $this->load->view('v_booking_editor');
@@ -99,17 +136,21 @@ class Booking extends CI_Controller {
 
     // tambah data
     function add(){
-        $data = array();           
+        $data = array();
         parse_str($_POST['data'], $data);
-    
+
         if (isset($data['id_bookingg'])) {
-          unset($data['id_bookingg']);         
+          unset($data['id_bookingg']);
         };
+
+        $split_kode = explode(" ", $data['kode']);
+        $max = explode("/", $split_kode[1]);
+        $data['no_increment_per_bulan'] = $max[1];
         $data['tanggal_input'] = DateTime::createFromFormat('d/m/Y', $data['tanggal_input'])->format('Y-m-d');
 
-        $tanggal_unit = $data['tanggal_unit'];        
+        $tanggal_unit = $data['tanggal_unit'];
         unset($data['tanggal_unit']);
-       
+
         $insert = $this->M_booking->insert($data,$tanggal_unit);
         if (!$insert) {
             $msg = $this->db->_error_message();
@@ -120,27 +161,25 @@ class Booking extends CI_Controller {
     // fungsi update
     // fungsi update
     function update(){
-     
+
       $data = array();
-      parse_str($_POST['data'], $data); 
+      parse_str($_POST['data'], $data);
       $id = array_key_exists('id_bookingg',$data) ? $data['id_bookingg']:$data['id_booking'];
       $data['tanggal_input'] = DateTime::createFromFormat('d/m/Y', $data['tanggal_input'])->format('Y-m-d');
-      $tanggal_unit = $data['tanggal_unit'];        
+      $tanggal_unit = $data['tanggal_unit'];
       unset($data['tanggal_unit']);
       unset($data['id_bookingg']);
       unset($data['id_booking']);
       unset($data['id_bookinererg']);
-  
+
       $update = $this->M_booking->update_by_id($data,$id,$tanggal_unit);
     }
 
+    #fungsi update harga pada input harga unit
     function update_harga(){
-      
        $data = array();
-       parse_str($_POST['data'], $data); 
-       $id = $data['id_booking']; 
-   
-       $update = $this->M_booking->update_harga($data,$id);
+       parse_str($_POST['data'], $data);
+       $update = $this->M_booking->update_harga($data['data']);
      }
 
     // fungsi hapus
@@ -170,7 +209,7 @@ class Booking extends CI_Controller {
     $data = $this->db->get('unit')->result_array();
     foreach ($data as $key => $value) {
       $select_item .= '<option value="'.$value['id_unit'].'" class="disabledunit">'.$value['nama'].'</option>'  ;
-    } 
+    }
     $footer = '</select>';
     $cb_content = $header.$select_item.$footer;
     echo $cb_content;
@@ -178,8 +217,8 @@ class Booking extends CI_Controller {
 
   function select_unit_for_edit($date,$unit){
 
-    $selected_val = array();      
-    
+    $selected_val = array();
+
     $header = '<select multiple class="form-control tanggal_unit" name="tanggal_unit[]['.$date.']" id="tanggal_unit">';
     $select_item = '';
     $footer = '</select>';
@@ -197,36 +236,46 @@ class Booking extends CI_Controller {
   }
 
   function booking_by_jadwal(){
-   
+
     $data = $this->input->post();
 
     // print_r($data);
     // die;
-    $tanggal = $input = array();       
+    $tanggal = $input = array();
     $tanggal_unit = array();
 
-          foreach ($data['data'] as $key => $value) {             
+          foreach ($data['data'] as $key => $value) {
             $date =  $value['tanggal']."-".$value['bulan']."-".$value['tahun'];
-            $id_unit = $value['id_unit'];           
-            $tanggal_unit[$date][] = $id_unit;             
+            $id_unit = $value['id_unit'];
+            $tanggal_unit[$date][] = $id_unit;
           }
-          foreach ($tanggal_unit as $key => $value) {                
-            $input[$key]['select'] = $this->select_unit_for_edit($date,$value);            
-            $input[$key]['id_date'] = $key;        
-          } 
-         
-          // $this->load->view('v_booking_editor_by_jadwal', array('data' => $input));     
-          
+          foreach ($tanggal_unit as $key => $value) {
+            $input[$key]['select'] = $this->select_unit_for_edit($date,$value);
+            $input[$key]['id_date'] = $key;
+          }
+
+          // $this->load->view('v_booking_editor_by_jadwal', array('data' => $input));
+
           $data['page'] = 'v_booking_editor_by_jadwal';
           $data['data'] = $input;
           $this->load->view('v_main',$data);
 
-  }  
+  }
+
 
   function detail_harga(){
     $id = $this->input->get('id');
     $data = $this->M_booking->get_detail_harga($id);
     echo json_encode($data);
   }
+
+  function view_invoice(){
+    $id = $this->input->get('id');
+    $data['id_booking'] = $id;
+    $this->load->view('v_invoice',$data);
+  }
+
+
+
 }
 ?>

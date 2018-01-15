@@ -14,7 +14,6 @@
 <script src="<?php echo base_url() ?>/AdminLTE/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
 <!-- FastClick -->
 <script src="<?php echo base_url() ?>/AdminLTE/bower_components/fastclick/lib/fastclick.js"></script>
-
+<script src="<?php echo base_url() ?>/AdminLTE/dist/js/adminlte.min.js"></script>
 
 </body>
-

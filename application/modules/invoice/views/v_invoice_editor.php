@@ -103,8 +103,6 @@ $('#lanjutkan').click(function(){
     request = $.get("<?php echo base_url('invoice') ?>/create_invoice_file",{id : id});
     request.done(function(data){
         arr = JSON.parse(data);
-
-
       $('#file_link').attr('href',arr.link);
       $('#file_name').text(arr.name);
         $("#loading").hide();

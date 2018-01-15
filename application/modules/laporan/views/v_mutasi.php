@@ -11,7 +11,9 @@
                                     <tr>
                                         <th>Tanggal</th>
                                         <th>Nama</th>
-                                       <th>Jumlah</th>                                    
+                                        <th>Tujuan</th>
+                                        <th>Vendor</th>
+                                       <th>Jumlah</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -24,7 +26,9 @@
                                     ?>
                                     <tr>
                                         <td><?php echo $value['tanggal'] ?></td>
-                                        <td><?php echo $value['nama'] ?></td>                                        
+                                        <td><?php echo $value['nama'] ?></td>
+                                        <td><?php echo $value['tujuan'] ?></td>
+                                        <td><?php echo $value['vendor'] ?></td>
                                         <td>Rp. <?php echo  number_format($value['jumlah']) ?> </td>
                                     </tr>
                                     <?php
@@ -33,7 +37,7 @@
                                 </tbody>
                                 <tfooter>
                                 <tr>
-                                    <td colspan="2"> Total </td>
+                                    <td colspan="4"> Total </td>
                                     <td>Rp. <?php echo number_format($total) ?></td>
                                 </tr>
                             <tfooter>

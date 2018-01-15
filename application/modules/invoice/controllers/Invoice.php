@@ -60,7 +60,7 @@ class Invoice extends CI_Controller {
             $count++;
         }
         $first = array("page" => "<<", "from" => 0 );
-        $last = array("page" => ">>", "from" => (ceil($total_page)-1) * $per_page );      
+        $last = array("page" => ">>", "from" => (ceil($total_page)-1) * $per_page );
         $next =   (ceil($total_page)-1) == 0? array("page" => ">", "from" => 0 ): array("page" => ">", "from" => $from_page+$per_page );
         $prev =   array("page" => "<", "from" => $from_page-$per_page );
 
@@ -113,10 +113,10 @@ class Invoice extends CI_Controller {
       $delete = $this->M_invoice->delete_by_id($id);
     }
 
-    function create_invoice_file(){     
-    
+    function create_invoice_file(){
+
       $id = $this->input->get('id');
-      $query = $this->db->select('id_sumber')->where('id_booking',$id)->get('booking')->result_array();   
+      $query = $this->db->select('id_sumber')->where('id_booking',$id)->get('booking')->result_array();
       $sumber = $query[0]['id_sumber'];
 
       switch ($sumber) {
@@ -124,51 +124,61 @@ class Invoice extends CI_Controller {
         $file_surat = base_url('file_invoice/template/invoice_arundina_bca.rtf');
           break;
           case '2':
-          $file_surat = base_url('file_invoice/template/invoice_arundina_bca.rtf');
+          $file_surat = base_url('file_invoice/template/invoice_busjakarta_bca.rtf');
           break;
           case '3':
-          $file_surat = base_url('file_invoice/template/invoice_arundina_bca.rtf');
+          $file_surat = base_url('file_invoice/template/invoice_elfjakarta_bca.rtf');
           break;
           case '4':
-          $file_surat = base_url('file_invoice/template/invoice_arundina_bca.rtf');
+          $file_surat = base_url('file_invoice/template/invoice_elfjogja_bca.rtf');
           break;
-        
+          case '5':
+          $file_surat = base_url('file_invoice/template/invoice_sewaelfbandung_bca.rtf');
+          break;
         default:
           # code...
           break;
       }
-        
+
+      $data_invoice = $this->M_invoice->get_detail_invoice($id);
+
+      foreach ($data_invoice['data_invoice'] as $key => $value) {
+        $new_key = "[".$key."]";
+       $array_replace_invoice[$new_key] = $value;
+      }
+
+      foreach ($data_invoice['detail_unit'][0] as $key => $value) {
+        $new_key = "[".$key."]";
+       $array_replace_unit[$new_key] = $value;
+      }
+
             $process = fopen($file_surat,'r');
             $content = stream_get_contents($process);
-                              
-            //Data Invoce
-            $array_replace = array(
-              "[nama_customer]" => "ddd",
-              "[alamat_customer]" => 'input_baru'            
-            );              
-            
-            $new_content = str_replace(array_keys($array_replace), array_values($array_replace), $content);                        
-            $path_innvoice = realpath(APPPATH.'../file_invoice/generated')."/";          
-            $nama_surat = 'invoice_test';            
+
+            $new_content = str_replace(array_keys($array_replace_invoice), array_values($array_replace_invoice), $content);
+            $new_content = str_replace(array_keys($array_replace_unit), array_values($array_replace_unit), $new_content);
+            $path_innvoice = realpath(APPPATH.'../file_invoice/generated')."/";
+            $nama_surat = 'invoice_test';
             $rtf_file = $path_innvoice.$nama_surat.".rtf";
             $pdf_file = $path_innvoice.$nama_surat.".pdf";
-           
+
             $handle = fopen($rtf_file,'w+');
             fwrite($handle,$new_content);
             fclose($handle);
-           
-            $output_dir = realpath(APPPATH.'../file_invoice/generated/');                        
+
+            $output_dir = realpath(APPPATH.'../file_invoice/generated/');
             $x = exec("libreoffice --headless --convert-to pdf $rtf_file --outdir $output_dir");
             // echo $pdf_file;
             $pdf_web_file = base_url('file_invoice/generated')."/".$nama_surat.".pdf";
+            $rtf_web_file = base_url('file_invoice/generated')."/".$nama_surat.".rtf";
 
-            $file_email = array('link' => $pdf_web_file,
+            $file_email = array('link' => $rtf_web_file,
                                 'base' => $output_dir."/".$nama_surat.".pdf",
                                 'name'=> $nama_surat.".pdf");
-            echo json_encode($file_email);                      
-             
+            echo json_encode($file_email);
+
         }
-      
+
 
 
 

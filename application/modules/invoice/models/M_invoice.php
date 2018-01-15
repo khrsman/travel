@@ -51,5 +51,26 @@ class M_invoice extends CI_Model
         $query = $this->db->delete('invoice');
     }
 
+    public function get_detail_invoice($id){
+         $this->db->select("
+          kode kode_booking,
+          (select nama from sumber where id_sumber = bk.id_sumber) detail_web,
+          (select nama from customer where id_customer = bk.id_customer) nama_cust,
+          (select alamat from customer where id_customer = bk.id_customer) alamat_cust,
+          tanggal_input tanggal,
+          (select nama from penanggung_jawab where id_penanggung_jawab = bk.id_penanggung_jawab) admin,
+          (select no_telepon from penanggung_jawab where id_penanggung_jawab = bk.id_penanggung_jawab) telp_admin
+         ")->where('id_booking',$id);
+          $data_booking =  $this->db->get('booking bk')->result_array()[0];
+
+         $this->db->select("(select nama from unit where id_unit = bk.id_unit) unit, '1' jml_unit, DATE_FORMAT(tanggal,'%d %M %Y') tanggal_unit, tujuan, harga harga_unit, (select sum(harga) from detail_booking where id_booking = bk.id_booking) total_harga
+           ")->where('id_booking',$id);
+           $data_unit =  $this->db->get('detail_booking bk')->result_array();
+
+           $data_invoice = array('data_invoice' => $data_booking, 'detail_unit' => $data_unit);
+
+        return $data_invoice;
+      }
+
 
 }

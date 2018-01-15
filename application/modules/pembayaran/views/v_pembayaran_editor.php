@@ -16,24 +16,24 @@
                             <input class="form-control datepicker" value="<?php echo date('d/m/Y') ?>" name="tanggal" id="tanggal" type="text">
                           </div>
                             </div>
-                      </div>                       
+                      </div>
                                 <input type="hidden" id="id_pembayaran" name="id_pembayaran" >
 																<div class="form-group">
                                   <label class="col-sm-4 control-label">Id booking</label>
                                   <div class="col-sm-8">
                                   <?php
-                                   $this->load->library('cb_options');                 
+                                   $this->load->library('cb_options');
                                   $this->cb_options->booking();
-                              ?> 
+                              ?>
                                   </div>
                             </div>
                             <div class="form-group">
                                   <label class="col-sm-4 control-label">Status</label>
                                   <div class="col-sm-8">
-                                  <?php       
-                                          
+                                  <?php
+
                                   $this->cb_options->status();
-                              ?> 
+                              ?>
                                   </div>
                             </div>
 													<div class="form-group">
@@ -42,45 +42,65 @@
                                       <input type = "text" name="jumlah" id="jumlah" class="form-control"  >
                                   </div>
                             </div>
-                           
-											
+
+
 													<div class="form-group">
                                   <label class="col-sm-4 control-label">Sisa</label>
                                   <div class="col-sm-8">
                                       <input type = "text" name="sisa" id="sisa" class="form-control"  >
                                   </div>
                             </div>
-													
+
                             </form>
                         </div>
                         <div class="box-footer" style="text-align:right">
-                            <a class="btn btn-danger" id="btn_cancel"><span class="fa fa-remove "></span> Cancel</a>
-                            <a class="btn btn-primary add_page" id="btn_save"><span class="fa fa-check "></span> Simpan</a>
-                            <a class="btn btn-primary edit_page" id="btn_update"><span class="fa fa-check "></span> update</a>
+                            <a class="btn btn-danger btn_aksi" id="btn_cancel"><span class="fa fa-remove "></span> Cancel</a>
+                            <a class="btn btn-primary  btn_aksi add_page" id="btn_simpan_pembayaran"><span class="fa fa-check "></span> Simpan</a>
+                            <!-- <a class="btn btn-primary edit_page" id="btn_update"><span class="fa fa-check "></span> update</a> -->
                         </div>
                     </div>
                 </div>
 
 
                 <div class="col-md-4">
-   <div id="email_form" >
-    <div class="box box-success box-solid">
+                        <div class="box box-success  box-solid" id="aksi" style="display:none">
+                          <div class="box-header with-border">
+                              <h3 class="box-title ">Aksi</h3>
+                          </div>
+                          <div class="box-body">
+                            <div class="aksi" display="none">
+                              <a class="btn btn-primary download" id="download_inv"><span class="fa fa-remove "></span> Download invoice</a>
+                              <a class="btn btn-primary download" id="download_kwitansi"><span class="fa fa-remove "></span> Download Kwitansi</a>
+                            </div>
+                          </div>
+                          <div class="box-footer" style="text-align:right">
+                              <a class="btn btn-success add_page" id="selesai"><span class="fa fa-check "></span> Selesai</a>
+                          </div>
+                      </div>
+                      <div id="loading" style="display:none">
+                      <center>
+                           <img src="<?php echo base_url('css/images/Loading_icon.gif') ?>" alt="">
+                           </center>
+                      </div>
+
+
+    <div class="box box-success box-solid" id="detail_booking">
         <div class="box-header with-border">
             <h3 class="box-title ">Data Booking</h3>
         </div>
-        <div class="box-body">   
-        <table id="modal_table" class="table table-stripped" style="border: 0px">     
+        <div class="box-body">
+        <table id="modal_table" class="table table-stripped" style="border: 0px">
         <tr>
                             <td><strong>Kode</strong></td>
                             <td>: </td>
                             <td><span id="detail_kode" >-</span></td>
                           </tr>
-                          <tr>                    
+                          <tr>
                           <tr>
                             <td width=100px><strong>Nama</strong></td>
                             <td>: </td>
                             <td><span id="detail_nama" >-</span></td>
-                          </tr>                        
+                          </tr>
                           <tr>
                             <td><strong>Tujuan</strong></td>
                             <td>: </td>
@@ -124,7 +144,6 @@
                         </table>
         </div>
     </div>
-    </div>
 </div>
 
             </div>
@@ -136,13 +155,53 @@
 <script>
 $(document).ready(function() {
 
+
+  function redirect(){
+    id = $("#id_booking").val();
+    $.get("<?php echo base_url('booking/view_invoice')?>", {id: id }).done(function(data){
+      $("#page_content").html(data);
+    });
+  }
+
+  $('#btn_simpan_pembayaran').click(function(){
+      var data = $('form').serialize();
+      request = $.post("<?php echo base_url('pembayaran') ?>/add",{data : data});
+      request.done(function(data){
+          notify_success('Data berhasil di simpan');
+          $("#aksi").show();
+          $("#detail_booking").hide();
+          $(".btn_aksi").hide();
+
+          // redirect();
+      })
+      request.fail(function() {
+          notify_error('Terjadi Kesalahan ');
+      })
+      });
+
+      $('#selesai').click(function(){
+        location.reload();
+      });
+
+      $('#download_kwitansi').click(function(){
+        id = $('#id_booking').val();
+        $("#loading").show();
+        request = $.get("<?php echo base_url('pembayaran') ?>/create_kwitansi_file",{id : id});
+        request.done(function(data){
+            arr = JSON.parse(data);
+            $("#loading").hide();
+             window.open(arr.link,'_blank');
+        })
+      });
+
+
 $('#jumlah').keyup(function(){
     total = $("#harga_jual").text();
     jumlah = $(this).val();
     sisa = total-jumlah;
-    $("#sisa").val(sisa); 
+    $("#sisa").val(sisa);
 })
-    
+
          $('.datepicker').datepicker({
            format: 'dd/mm/yyyy',
            todayBtn: "linked",
@@ -165,5 +224,5 @@ $.each(arr, function(key, value){
         });
 })
 })
-      }); 
+      });
 </script>

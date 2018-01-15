@@ -7,7 +7,18 @@
                         <div class="box-body">
                             <form role="form" class="form-horizontal xform">
                                 <input type="hidden" id="id_pengeluaran" name="id_pengeluaran" >
-																<div class="form-group">
+                                <div class="form-group">
+                                <label class="col-sm-4 control-label">Tanggal</label>
+                                <div class="col-sm-8">
+                                <div class="input-group">
+                                <div class="input-group-addon">
+                                  <i class="fa fa-calendar"></i>
+                                </div>
+                                <input class="form-control datepicker" value="<?php echo date('d/m/Y') ?>" name="tanggal" id="tanggal" type="text">
+                              </div>
+                                </div>
+                          </div>
+                                <div class="form-group">
                                   <label class="col-sm-4 control-label">Kategori pengeluaran</label>
                                   <div class="col-sm-8">
                                       <!-- <input type = "text" name="id_kategori_pengeluaran" id="id_kategori_pengeluaran" class="form-control"  > -->
@@ -39,18 +50,8 @@
                                       <input type = "text" name="jumlah" id="jumlah" class="form-control"  >
                                   </div>
                             </div>
-                            <div class="form-group">
-                            <label class="col-sm-4 control-label">Tanggal</label>
-                            <div class="col-sm-8">
-                            <div class="input-group">
-                            <div class="input-group-addon">
-                              <i class="fa fa-calendar"></i>
-                            </div>
-                            <input class="form-control datepicker" value="<?php echo date('d/m/Y') ?>" name="tanggal" id="tanggal" type="text">
-                          </div>
-                            </div>
-                      </div>
-													
+
+
                             </form>
                         </div>
                         <div class="box-footer" style="text-align:right">

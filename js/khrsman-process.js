@@ -38,17 +38,17 @@ $().ready(function(){
   });
 
   // Aksi pada saat tombol simpan di klik
-  $('body').on('click', '#btn_save', function() {   
+  $('body').on('click', '#btn_save', function() {
       var data = $('form').serialize();
       insert(data)
     });
 
  // Aksi pada saat tombol update di klik
  $('body').on('click', '#btn_update', function() {
-  
+
      var data = $('form').serialize();
      update(data);
-  
+
  });
  });
 
@@ -187,12 +187,12 @@ function remove(id){
 
 // fungsi simpan
 function insert(data,callback){
-  
-  // if(!validate()){
-  //     return;
-  //   console.log('gagal validasi');
-  // }
 
+  // callback();
+  if(!validate()){
+      return;
+    console.log('gagal validasi');
+  }
   request =  $.post(url_simpan, {data: data});
   request.done(function(data){
     notify_success('Data berhasil disimpan');
